@@ -1,0 +1,23 @@
+Job launching after 0.16 seconds in submission.
+Running python job.
+Changed into dir /home/nautilik/cs231n/assignment1/nn_optimizer
+Importing nn_optimize.py
+Running nn_optimize.main()
+Traceback (most recent call last):
+  File "/home/nautilik/cs231n/assignment1/spearmint/spearmint/launcher.py", line 243, in launch
+    result = python_launcher(job)
+  File "/home/nautilik/cs231n/assignment1/spearmint/spearmint/launcher.py", line 327, in python_launcher
+    result = module.main(job['id'], params)
+  File "/home/nautilik/cs231n/assignment1/nn_optimizer/nn_optimize.py", line 49, in main
+    X_train, y_train, X_val, y_val, _, _ = get_CIFAR10_data()
+  File "/home/nautilik/cs231n/assignment1/nn_optimizer/nn_optimize.py", line 33, in get_CIFAR10_data
+    mean_image = np.mean(X_train, axis=0)
+  File "/home/nautilik/cs231n/assignment1/.env/local/lib/python2.7/site-packages/numpy/core/fromnumeric.py", line 2878, in mean
+    out=out, keepdims=keepdims)
+  File "/home/nautilik/cs231n/assignment1/.env/local/lib/python2.7/site-packages/numpy/core/_methods.py", line 65, in _mean
+    ret = umr_sum(arr, axis, dtype, out, keepdims)
+KeyboardInterrupt
+Problem executing the function
+Job failed in 2.36 seconds.
+Training new neural net and calculating validation value job #1
+(<type 'exceptions.KeyboardInterrupt'>, KeyboardInterrupt(), <traceback object at 0x7f95831a9cb0>)

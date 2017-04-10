@@ -1,0 +1,9 @@
+Job launching after 0.30 seconds in submission.
+Running python job.
+Changed into dir /home/nautilik/cs231n/assignment1/nn_optimizer
+Importing nn_optimize.py
+Running nn_optimize.main()
+Got result -0.502
+Completed successfully in 200.13 seconds. [{u'main': -0.502}]
+Training new neural net and calculating validation value job #15
+Validation accuracy:  0.502

@@ -1,0 +1,19 @@
+Job launching after 0.22 seconds in submission.
+Running python job.
+Changed into dir /home/nautilik/cs231n/assignment1/nn_optimizer
+Importing nn_optimize.py
+Running nn_optimize.main()
+../cs231n/classifiers/neural_net.py:108: RuntimeWarning: divide by zero encountered in log
+  loss = np.sum(-np.log(probs[xrange(N), y]))
+../cs231n/classifiers/neural_net.py:106: RuntimeWarning: overflow encountered in subtract
+  layer2 -= np.reshape(np.max(layer2, axis=1), (layer2.shape[0],1))
+../cs231n/classifiers/neural_net.py:106: RuntimeWarning: invalid value encountered in subtract
+  layer2 -= np.reshape(np.max(layer2, axis=1), (layer2.shape[0],1))
+../cs231n/classifiers/neural_net.py:82: RuntimeWarning: invalid value encountered in less
+  sum1[sum1 < 0] = 0 # ReLU
+../cs231n/classifiers/neural_net.py:133: RuntimeWarning: invalid value encountered in greater
+  dsum1 = np.multiply(sum1 > 0, dlayer1) # dloss/dsum (N,H)
+Got result -0.087
+Completed successfully in 47.22 seconds. [{u'main': -0.086999999999999994}]
+Training new neural net and calculating validation value job #4
+Validation accuracy:  0.087

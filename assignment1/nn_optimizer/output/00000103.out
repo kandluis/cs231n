@@ -1,0 +1,23 @@
+Job launching after 0.45 seconds in submission.
+Running python job.
+Changed into dir /home/nautilik/cs231n/assignment1/nn_optimizer
+Importing nn_optimize.py
+Running nn_optimize.main()
+Traceback (most recent call last):
+  File "/home/nautilik/cs231n/assignment1/spearmint/spearmint/launcher.py", line 243, in launch
+    result = python_launcher(job)
+  File "/home/nautilik/cs231n/assignment1/spearmint/spearmint/launcher.py", line 327, in python_launcher
+    result = module.main(job['id'], params)
+  File "/home/nautilik/cs231n/assignment1/nn_optimizer/nn_optimize.py", line 49, in main
+    X_train, y_train, X_val, y_val, _, _ = get_CIFAR10_data()
+  File "/home/nautilik/cs231n/assignment1/nn_optimizer/nn_optimize.py", line 19, in get_CIFAR10_data
+    X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
+  File "../cs231n/data_utils.py", line 33, in load_CIFAR10
+    X, Y = load_CIFAR_batch(f)
+  File "../cs231n/data_utils.py", line 23, in load_CIFAR_batch
+    X = X.reshape(10000, 3, 32, 32).transpose(0,2,3,1).astype("float")
+KeyboardInterrupt
+Problem executing the function
+Job failed in 0.95 seconds.
+Training new neural net and calculating validation value job #103
+(<type 'exceptions.KeyboardInterrupt'>, KeyboardInterrupt(), <traceback object at 0x7f6798080488>)

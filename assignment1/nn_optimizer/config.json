@@ -1,0 +1,32 @@
+{
+    "language"        : "PYTHON",
+    "main-file"       : "nn_optimize.py",
+    "experiment-name" : "nn_optimize",
+    "likelihood"      : "GAUSSIAN",
+    "variables" : {
+        "hidden_size" : {
+            "type" : "INT",
+            "size" : 1,
+            "min"  : 100,
+            "max"  : 800
+        },
+        "learning_rate" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0.0001,
+            "max"  : 0.01
+        },
+        "learning_rate_decay" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0.9,
+            "max"  : 1.0
+        },
+        "regularization" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0.001,
+            "max"  : 1
+        }
+    }
+}

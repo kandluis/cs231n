@@ -1,0 +1,21 @@
+Job launching after 0.43 seconds in submission.
+Running python job.
+Changed into dir /home/nautilik/cs231n/assignment1/nn_optimizer
+Importing nn_optimize.py
+Running nn_optimize.main()
+Traceback (most recent call last):
+  File "/home/nautilik/cs231n/assignment1/spearmint/spearmint/launcher.py", line 243, in launch
+    result = python_launcher(job)
+  File "/home/nautilik/cs231n/assignment1/spearmint/spearmint/launcher.py", line 327, in python_launcher
+    result = module.main(job['id'], params)
+  File "/home/nautilik/cs231n/assignment1/nn_optimizer/nn_optimize.py", line 61, in main
+    reg=r)
+  File "../cs231n/classifiers/neural_net.py", line 198, in train
+    loss, grads = self.loss(X_batch, y=y_batch, reg=reg)
+  File "../cs231n/classifiers/neural_net.py", line 140, in loss
+    dW1 += 2 * reg * W1
+KeyboardInterrupt
+Problem executing the function
+Job failed in 555.37 seconds.
+Training new neural net and calculating validation value job #50
+(<type 'exceptions.KeyboardInterrupt'>, KeyboardInterrupt(), <traceback object at 0x7f8b1453e128>)
