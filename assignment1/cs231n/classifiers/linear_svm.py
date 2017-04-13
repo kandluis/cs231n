@@ -76,12 +76,11 @@ def svm_loss_vectorized(W, X, y, reg):
   num_classes = W.shape[1]
   num_train = X.shape[0]
   scores = X.dot(W)
-  correct_class_score = scores[range(scores.shape[0]), y]
+  correct_class_score = scores[np.arange(scores.shape[0]), y]
   margin = (scores.T - correct_class_score.T + 1).T
-  loss_matrix = margin[:]
-  loss_matrix[margin < 0] = 0 # max(0, _)
-  loss_matrix[range(margin.shape[0]), y] = 0 # j \neq y_i
-  loss = np.sum(loss_matrix)
+  margin[margin < 0] = 0 # max(0, _)
+  margin[np.arange(margin.shape[0]), y] = 0 # j \neq y_i
+  loss = np.sum(margin)
   loss /= num_train
   loss += np.sum(reg * W * W)
   #############################################################################
@@ -98,9 +97,9 @@ def svm_loss_vectorized(W, X, y, reg):
   # to reuse some of the intermediate values that you used to compute the     #
   # loss.                                                                     #
   #############################################################################
-  dW = np.dot(X.T, (loss_matrix > 0))
-  count = np.zeros(loss_matrix.shape)
-  count[range(count.shape[0]), y] = np.sum(loss_matrix > 0, axis=1)
+  dW = np.dot(X.T, (margin > 0))
+  count = np.zeros(margin.shape)
+  count[np.arange(count.shape[0]), y] = np.sum(margin > 0, axis=1)
   dW -= np.dot(X.T, count)
   
   dW /= num_train  

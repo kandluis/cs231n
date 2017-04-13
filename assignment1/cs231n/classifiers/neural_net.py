@@ -77,14 +77,11 @@ class TwoLayerNet(object):
     # shape (N, C).                                                             #
     #############################################################################
     # layer1 output is (N,H) matrix with max(-,0) activation.
-    dot1 = np.dot(X,W1)
-    sum1 = dot1 + b1
-    sum1[sum1 < 0] = 0 # ReLU
-    layer1 = sum1[:]
+    sum1 = np.dot(X,W1) + b1
+    layer1 = np.multiply(sum1, sum1 > 0) # ReLU
     
     # layer2 output is (N,C)
-    dot2 = np.dot(layer1, W2)
-    layer2 = dot2 + b2
+    layer2 = np.dot(layer1, W2) + b2
     scores = layer2
    
     #############################################################################
@@ -105,7 +102,7 @@ class TwoLayerNet(object):
     #############################################################################
     layer2 -= np.reshape(np.max(layer2, axis=1), (layer2.shape[0],1))
     probs = np.exp(layer2) / np.reshape(np.sum(np.exp(layer2), axis=1), (layer2.shape[0],1))
-    loss = np.sum(-np.log(probs[xrange(N), y]))
+    loss = np.sum(-np.log(probs[np.arange(N), y]))
     loss /= N
     
     loss += reg * np.sum(W1**2)
@@ -122,19 +119,17 @@ class TwoLayerNet(object):
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
     dlayer2 = probs[:]
-    dlayer2[xrange(N), y] -= 1
+    dlayer2[np.arange(N), y] -= 1
     dlayer2 /= N # dloss/dlayer2 (N,C)
     
-    ddot2 = (1) * dlayer2  # dloss/ddot2 (N,C)
-    db2 = (1) * np.sum(ddot2, axis=0)  # dloss/db2 (C,)
-    dW2 = np.dot(layer1.T, ddot2) # dloss/dW2 (H,N)x(N,C) = (H,C)
-    dlayer1 = np.dot(ddot2, W2.T) # dloss/dlayer1 (N,C)x(C,H) = (N,H)
+    db2 = (1) * np.sum(dlayer2, axis=0)  # dloss/db2 (C,)
+    dW2 = np.dot(layer1.T, dlayer2) # dloss/dW2 (H,N)x(N,C) = (H,C)
+    dlayer1 = np.dot(dlayer2, W2.T) # dloss/dlayer1 (N,C)x(C,H) = (N,H)
     
     dsum1 = np.multiply(sum1 > 0, dlayer1) # dloss/dsum (N,H)
     
-    ddot1 = (1) * dsum1 # dloss/ddot1 (N,H)
     db1 = (1) * np.sum(dsum1, axis=0) # dloss/db1 (H,)
-    dW1 = np.dot(X.T, ddot1) # dloss/dW1 (D,N)x(N,H) = (D,H)
+    dW1 = np.dot(X.T, dsum1) # dloss/dW1 (D,N)x(N,H) = (D,H)
     
     # Regularization is easy.
     dW1 += 2 * reg * W1
@@ -187,7 +182,7 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      selected_index = np.random.choice(xrange(num_train), batch_size)
+      selected_index = np.random.choice(np.arange(num_train), batch_size)
       X_batch = X[selected_index, :]
       y_batch = y[selected_index]
       #########################################################################
