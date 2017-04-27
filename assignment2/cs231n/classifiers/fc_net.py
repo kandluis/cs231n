@@ -5,6 +5,44 @@ import numpy as np
 from cs231n.layers import *
 from cs231n.layer_utils import *
 
+def affine_bn_relu_forward(x, w, b, gamma, beta, bn_param):
+    """
+    Convenience layer that perorms an affine transform followed by a ReLU with
+    batch normalization.
+
+    Inputs:
+    - x: Input to the affine layer
+    - w, b: Weights for the affine layer
+    - gamma: Scale parameter of shape (D,)
+    - beta: Shift parameter of shape (D,)
+    - bn_param: Dictionary with the following keys:
+      - mode: 'train' or 'test'; required
+      - eps: Constant for numeric stability
+      - momentum: Constant for running mean / variance.
+      - running_mean: Array of shape (D,) giving running mean of features
+      - running_var Array of shape (D,) giving running variance of features
+
+    Returns a tuple of:
+    - out: Output from the ReLU
+    - cache: Object to give to the backward pass
+    """
+    a, fc_cache = affine_forward(x, w, b)
+    b, bn_cache = batchnorm_forward(a, gamma, beta, bn_param)
+    out, relu_cache = relu_forward(b)
+    cache = (fc_cache, bn_cache, relu_cache)
+    return out, cache
+
+
+def affine_bn_relu_backward(dout, cache):
+    """
+    Backward pass for the affine-batch norm-relu convenience layer
+    """
+    fc_cache, bn_cache, relu_cache = cache
+    da = relu_backward(dout, relu_cache)
+    db, dgamma, dbeta = batchnorm_backward_alt(da, bn_cache)
+    dx, dw, db = affine_backward(db, fc_cache)
+    return dx, dw, db, dgamma, dbeta
+
 
 class TwoLayerNet(object):
     """
@@ -184,6 +222,10 @@ class FullyConnectedNet(object):
             self.params['W%s' % i] = np.random.normal(
                 0, weight_scale, (dims[i-1], dims[i]))
             self.params['b%s' % i] = np.zeros(dims[i])
+        if self.use_batchnorm:
+            for i in range(1, self.num_layers):
+                self.params['gamma%s' % i] = np.ones(dims[i])
+                self.params['beta%s' % i] = np.zeros(dims[i])
         #######################################################################
         #                             END OF YOUR CODE                             #
         #######################################################################
@@ -243,10 +285,18 @@ class FullyConnectedNet(object):
         #######################################################################
         caches = {}
         layer_input = X
-        for i in range(1, self.num_layers):
-            layer_input, cache = affine_relu_forward(layer_input,
-                self.params['W%s' % i], self.params['b%s' % i])
-            caches[i] = cache
+        if self.use_batchnorm:
+            for i in range(1, self.num_layers):
+                layer_input, cache = affine_bn_relu_forward(layer_input,
+                    self.params['W%s' % i], self.params['b%s' % i],
+                    self.params['gamma%s' % i], self.params['beta%s' % i],
+                    self.bn_params[i-1])
+                caches[i] = cache
+        else:
+            for i in range(1, self.num_layers):
+                layer_input, cache = affine_relu_forward(layer_input,
+                    self.params['W%s' % i], self.params['b%s' % i])
+                caches[i] = cache
         scores, last_cache = affine_forward(layer_input,
                 self.params['W%s' % self.num_layers],
                 self.params['b%s' % self.num_layers])
@@ -274,14 +324,28 @@ class FullyConnectedNet(object):
         #######################################################################
         loss, df = softmax_loss(scores, y)
         dhidden, dW, db = affine_backward(df, last_cache)
-        for i in reversed(range(1, self.num_layers + 1)):
+        dgamma, dbeta = None, None
+        if self.use_batchnorm:
+            for i in reversed(range(1, self.num_layers + 1)):
+                dW += self.reg * self.params['W%s' % i]
+                grads['W%s' % i] = dW
+                grads['b%s' % i] = db
+                if dgamma is not None: grads['gamma%s' % i] = dgamma
+                if dbeta is not None: grads['beta%s' % i] = dbeta
+                if i > 1:
+                    dhidden, dW, db, dgamma, dbeta = affine_bn_relu_backward(
+                        dhidden, caches[i-1])
+        else:
+            for i in reversed(range(1, self.num_layers + 1)):
+                dW += self.reg * self.params['W%s' % i]
+                grads['W%s' % i] = dW
+                grads['b%s' % i] = db
+                if i > 1:
+                    dhidden, dW, db = affine_relu_backward(dhidden, caches[i-1])
+        # Add regularization.
+        for i in range(1, self.num_layers + 1):
             W = self.params['W%s' % i]
             loss += 0.5 * self.reg * np.sum(W * W)
-            dW += self.reg * W
-            grads['W%s' % i] = dW
-            grads['b%s' % i] = db
-            if i > 1:
-                dhidden, dW, db = affine_relu_backward(dhidden, caches[i-1])
         #######################################################################
         #                             END OF YOUR CODE                             #
         #######################################################################
