@@ -291,12 +291,20 @@ class FullyConnectedNet(object):
                     self.params['W%s' % i], self.params['b%s' % i],
                     self.params['gamma%s' % i], self.params['beta%s' % i],
                     self.bn_params[i-1])
-                caches[i] = cache
+                dropout_cache = None
+                if self.use_dropout:
+                    layer_input, dropout_cache = dropout_forward(layer_input,
+                        self.dropout_param)
+                caches[i] = (cache, dropout_cache)
         else:
             for i in range(1, self.num_layers):
                 layer_input, cache = affine_relu_forward(layer_input,
                     self.params['W%s' % i], self.params['b%s' % i])
-                caches[i] = cache
+                dropout_cache = None
+                if self.use_dropout:
+                    layer_input, dropout_cache = dropout_forward(layer_input,
+                        self.dropout_param)
+                caches[i] = (cache, dropout_cache)
         scores, last_cache = affine_forward(layer_input,
                 self.params['W%s' % self.num_layers],
                 self.params['b%s' % self.num_layers])
@@ -333,15 +341,21 @@ class FullyConnectedNet(object):
                 if dgamma is not None: grads['gamma%s' % i] = dgamma
                 if dbeta is not None: grads['beta%s' % i] = dbeta
                 if i > 1:
+                    cache, dropout_cache = caches[i-1]
+                    if self.use_dropout:
+                        dhidden = dropout_backward(dhidden, dropout_cache)
                     dhidden, dW, db, dgamma, dbeta = affine_bn_relu_backward(
-                        dhidden, caches[i-1])
+                        dhidden, cache)
         else:
             for i in reversed(range(1, self.num_layers + 1)):
                 dW += self.reg * self.params['W%s' % i]
                 grads['W%s' % i] = dW
                 grads['b%s' % i] = db
                 if i > 1:
-                    dhidden, dW, db = affine_relu_backward(dhidden, caches[i-1])
+                    cache, dropout_cache = caches[i-1]
+                    if self.use_dropout:
+                        dhidden = dropout_backward(dhidden, dropout_cache)
+                    dhidden, dW, db = affine_relu_backward(dhidden, cache)
         # Add regularization.
         for i in range(1, self.num_layers + 1):
             W = self.params['W%s' % i]
