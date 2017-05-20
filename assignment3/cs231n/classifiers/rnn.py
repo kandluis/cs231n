@@ -137,7 +137,25 @@ class CaptioningRNN(object):
         # defined above to store loss and gradients; grads[k] should give the      #
         # gradients for self.params[k].                                            #
         ############################################################################
-        pass
+        h0 = np.dot(features, W_proj) + b_proj
+        embedding, embedding_cache = word_embedding_forward(captions_in, W_embed)
+        if self.cell_type == "rnn":
+            layer_forward_fn, layer_backward_fn = rnn_forward, rnn_backward
+        elif self.cell_type == "lstm":
+            layer_forward_fn, layer_backward_fn = lstm_forward, lstm_backward
+        else:
+            raise ValueError('Invalid cell_type "%s"' % self.cell_type)
+
+        hidden, layer_cache = layer_forward_fn(embedding, h0, Wx, Wh, b)
+        scores, affine_cache = temporal_affine_forward(hidden, W_vocab, b_vocab)
+        loss, dscores = temporal_softmax_loss(scores, captions_out, mask)
+        dhidden, grads['W_vocab'], grads['b_vocab'] = temporal_affine_backward(
+            dscores, affine_cache)
+        dembedding, dh0, grads['Wx'], grads['Wh'], grads['b'] = layer_backward_fn(
+            dhidden, layer_cache)
+        grads['W_embed'] = word_embedding_backward(dembedding, embedding_cache)
+        grads['W_proj'] = np.dot(features.T, dh0)
+        grads['b_proj'] = np.sum(dh0, axis=0)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -199,7 +217,22 @@ class CaptioningRNN(object):
         # functions; you'll need to call rnn_step_forward or lstm_step_forward in #
         # a loop.                                                                 #
         ###########################################################################
-        pass
+        hidden = np.dot(features, W_proj) + b_proj
+        if self.cell_type == "lstm":
+            cell_state = np.zeros(hidden.shape)
+        tokens = self._start * np.ones(N, dtype=np.int32)
+        for i in range(max_length):
+            words, _ = word_embedding_forward(tokens, W_embed)
+            if self.cell_type == 'rnn':
+                hidden, _ = rnn_step_forward(words, hidden, Wx, Wh, b)
+            elif self.cell_type == 'lstm':
+                hidden, cell_state, _ = lstm_step_forward(
+                    words, hidden, cell_state, Wx, Wh, b)
+            else:
+                raise ValueError('Invalid cell_type "%s"' % self.cell_type)
+            scores = np.dot(hidden, W_vocab) + b_vocab
+            tokens = np.argmax(scores, axis=1)
+            captions[:,i] = tokens
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
